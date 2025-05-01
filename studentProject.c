@@ -1,8 +1,11 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 
-#define STUDENTS_NUMBER 20
 #define LENGTH_MAX_NAME 50
+#define STUDENTS_NUMBER 20
+
+int studentsNumber = STUDENTS_NUMBER;
 
 typedef struct {
   int code;
@@ -32,11 +35,21 @@ Student students[STUDENTS_NUMBER] = {
   {20, "Tomas Aguirre"}
 };
 
-bool isIntegervalue(int *integer) {
+bool isIntegerValid(int *integer) {
   char buffer[100];
 
   if (fgets(buffer, sizeof(buffer), stdin)) {
     return sscanf(buffer, "%d", integer) == 1;
+  }
+
+  return false;
+}
+
+bool isCharValid(char charecter[100]) {
+  char buffer[100];
+
+  if (fgets(buffer, sizeof(buffer), stdin)) {
+    return sscanf(buffer, "%s", charecter) == 1;
   }
 
   return false;
@@ -52,16 +65,23 @@ void showOptionsMenu() {
 }
 
 void showStudents() {
-  for (int i = 0; i < STUDENTS_NUMBER; i++) {
+  for (int i = 0; i < studentsNumber; i++) {
     printf("Codigo: %d, Nombre: %s\n", students[i].code, students[i].name);
   }
 }
 
+void addStudent(int code, char* name) {
+  students[studentsNumber].code = code;
+
+  strcpy(students[studentsNumber].name, name);
+
+  studentsNumber++;
+}
+
 int findStudentIndexByCode(int code) {
   int indexStudent = -1;
-  int studentsSize = sizeof(students) / sizeof(students[0]);
 
-  for (int i = 0; i < studentsSize - 1; i++) {
+  for (int i = 0; i < studentsNumber; i++) {
     if (students[i].code == code) {
       indexStudent = i;
 
@@ -78,11 +98,11 @@ void deleteStudentByCode(int code) {
   if (indexStudent == -1) {
     printf("Codigo no encontrado, por favor ingresa un codigo valido.\n");
   } else {
-    int studentsSize = sizeof(students) / sizeof(students[0]);
+    printf("%d index, %d students number \n", indexStudent, studentsNumber);
 
-    for (int i = indexStudent; i < studentsSize - 1; i++) {
-      students[i] = students[i + 1];
-    }
+    students[indexStudent] = students[indexStudent + 1];
+
+    studentsNumber--;
 
     printf("Estudiante borrado...\n");
   }
@@ -93,7 +113,7 @@ int main() {
   bool isStudentsSystemOpen = true;
 
   printf(
-    "\n--- Bienvenido al sistema de estudiantes, se te presentan las siguientes opciones: ---\n"
+    "--- Bienvenido al sistema de estudiantes, se te presentan las siguientes opciones: ---\n"
   );
   showOptionsMenu();
 
@@ -101,34 +121,58 @@ int main() {
     printf("Pulsa (6) para ver el menu de opciones.\n");
     printf("Ingresa la opcion que deseas realizar: ");
 
-    if (!isIntegervalue(&option)) {
+    if (!isIntegerValid(&option)) {
       printf("Entrada invalida. Debes ingresar un numero entero.\n");
 
       continue;
     }
 
+    int code;
+    char name[100];
+
     switch (option) {
       case 0: isStudentsSystemOpen = false; break;
       case 1: showStudents(); break;
       case 2:
-        int code;
-
         showStudents();
         printf("Escribe el codigo del estudiante que deseas borrar: ");
 
-        if (isIntegervalue(&code)) {
+        if (isIntegerValid(&code)) {
           deleteStudentByCode(code);
         } else {
           printf("Entrada invalida. Debes ingresar numeros entero.\n");
         }
 
         break;
-      case 3: printf("Opcion 3.\n"); break;
+      case 3:
+        printf("Escribe el codigo del estudiante que deseas agregar: ");
+
+        if (!isIntegerValid(&code)) {
+          printf("Entrada invalida. Valores correctos.\n");
+        }
+
+        const int index = findStudentIndexByCode(code);
+
+        if (index != 1) {
+          printf("El codigo que deseas registrar ya existe.\n");
+
+          continue;
+        }
+
+        printf("Escribe el nombre del estudiante que deseas agregar: ");
+
+        if (!isCharValid(name)) {
+          printf("Entrada invalida. Valores correctos.\n");
+        }
+
+        addStudent(code, name);
+
+        break;
       case 4: 
         showStudents();
         printf("Escribe el codigo del estudiante que deseas buscar: ");
 
-        if (isIntegervalue(&code)) {
+        if (isIntegerValid(&code)) {
           int index = findStudentIndexByCode(code);
 
           if (index == -1) {
@@ -140,7 +184,8 @@ int main() {
           printf("Entrada invalida. Debes ingresar numeros entero.\n");
         }
         break;
-      case 5: printf("Opcion 5.\n"); break;
+      case 5:
+        printf("Opcion 5.\n"); break;
       case 6: showOptionsMenu(); break;
   
       default: printf("Opcion no encontrada.\n");
