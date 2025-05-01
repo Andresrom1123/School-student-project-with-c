@@ -70,14 +70,6 @@ void showStudents() {
   }
 }
 
-void addStudent(int code, char* name) {
-  students[studentsNumber].code = code;
-
-  strcpy(students[studentsNumber].name, name);
-
-  studentsNumber++;
-}
-
 int findStudentIndexByCode(int code) {
   int indexStudent = -1;
 
@@ -90,6 +82,20 @@ int findStudentIndexByCode(int code) {
   }
 
   return indexStudent;
+}
+
+void addStudent(int code, char* name) {
+  const int index = findStudentIndexByCode(code);
+
+  if (index != 1) {
+    printf("El codigo que deseas registrar ya existe.\n");
+  } else {
+    students[studentsNumber].code = code;
+  
+    strcpy(students[studentsNumber].name, name);
+  
+    studentsNumber++;
+  }
 }
 
 void deleteStudentByCode(int code) {
@@ -128,6 +134,7 @@ int main() {
     }
 
     int code;
+    int index;
     char name[100];
 
     switch (option) {
@@ -149,14 +156,6 @@ int main() {
 
         if (!isIntegerValid(&code)) {
           printf("Entrada invalida. Valores correctos.\n");
-        }
-
-        const int index = findStudentIndexByCode(code);
-
-        if (index != 1) {
-          printf("El codigo que deseas registrar ya existe.\n");
-
-          continue;
         }
 
         printf("Escribe el nombre del estudiante que deseas agregar: ");
@@ -185,7 +184,30 @@ int main() {
         }
         break;
       case 5:
-        printf("Opcion 5.\n"); break;
+          printf("Ingresa el codigo del estudiante a modificar: ");
+
+          if (!isIntegerValid(&code)) {
+            printf("Ingresa un codigo valido.\n");
+          }
+
+          printf("\n");
+          printf("Ingresa el nuevo nombre del estudiante: ");
+
+          if (!isCharValid(name)) {
+            printf("Ingresa un nombre valido\n");
+          }
+
+          int index = findStudentIndexByCode(code);
+
+          if (index == -1) {
+            printf("El estudiante que quieres modificar no existe.\n");
+
+            continue;
+          }
+
+        printf("Estudiante modificado...\n");
+
+        break;
       case 6: showOptionsMenu(); break;
   
       default: printf("Opcion no encontrada.\n");
